@@ -983,8 +983,8 @@ void showSolidColor()
 void rainbow()
 {
   // FastLED's built-in rainbow generator
-  fill_rainbow( leds, HALF_LEDS, gHue, 255 / HALF_LEDS);
-  reverse_fill_rainbow( leds + HALF_LEDS, HALF_LEDS, gHue, 255 / HALF_LEDS);
+  fill_rainbow( leds, HALF_LEDS, gHue, 1000 / HALF_LEDS);
+  reverse_fill_rainbow( leds + HALF_LEDS, HALF_LEDS, gHue, 1000 / HALF_LEDS);
 }
 
 void rainbowWithGlitter()
