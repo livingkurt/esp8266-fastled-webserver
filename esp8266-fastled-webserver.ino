@@ -42,7 +42,7 @@ extern "C" {
 
 //#include "Commands.h"
 
-const bool apMode = false;
+const bool apMode = true;
 
 ESP8266WebServer webServer(80);
 WebSocketsServer webSocketsServer = WebSocketsServer(81);
@@ -52,10 +52,11 @@ ESP8266HTTPUpdateServer httpUpdateServer;
 
 #include "FSBrowser.h"
 
-#define DATA_PIN      D4
-#define LED_TYPE      WS2811
+#define DATA_PIN      D2
+#define LED_TYPE      WS2812B
 #define COLOR_ORDER   GRB
-#define NUM_LEDS      24
+#define NUM_LEDS      60
+#define HALF_LEDS     NUM_LEDS / 2
 
 #define MILLI_AMPS         2000     // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA)
 #define FRAMES_PER_SECOND  120 // here you can control the speed. With the Access Point / Web Server the animations run a bit slower.
@@ -138,30 +139,30 @@ PatternAndNameList patterns = {
   { snowTwinkles,           "Snow Twinkles" },
   { cloudTwinkles,          "Cloud Twinkles" },
   { incandescentTwinkles,   "Incandescent Twinkles" },
-
-  // TwinkleFOX patterns
-  { retroC9Twinkles,        "Retro C9 Twinkles" },
-  { redWhiteTwinkles,       "Red & White Twinkles" },
-  { blueWhiteTwinkles,      "Blue & White Twinkles" },
-  { redGreenWhiteTwinkles,  "Red, Green & White Twinkles" },
-  { fairyLightTwinkles,     "Fairy Light Twinkles" },
-  { snow2Twinkles,          "Snow 2 Twinkles" },
-  { hollyTwinkles,          "Holly Twinkles" },
-  { iceTwinkles,            "Ice Twinkles" },
-  { partyTwinkles,          "Party Twinkles" },
-  { forestTwinkles,         "Forest Twinkles" },
-  { lavaTwinkles,           "Lava Twinkles" },
-  { fireTwinkles,           "Fire Twinkles" },
-  { cloud2Twinkles,         "Cloud 2 Twinkles" },
-  { oceanTwinkles,          "Ocean Twinkles" },
+//
+//  // TwinkleFOX patterns
+//  { retroC9Twinkles,        "Retro C9 Twinkles" },
+//  { redWhiteTwinkles,       "Red & White Twinkles" },
+//  { blueWhiteTwinkles,      "Blue & White Twinkles" },
+//  { redGreenWhiteTwinkles,  "Red, Green & White Twinkles" },
+//  { fairyLightTwinkles,     "Fairy Light Twinkles" },
+//  { snow2Twinkles,          "Snow 2 Twinkles" },
+//  { hollyTwinkles,          "Holly Twinkles" },
+//  { iceTwinkles,            "Ice Twinkles" },
+//  { partyTwinkles,          "Party Twinkles" },
+//  { forestTwinkles,         "Forest Twinkles" },
+//  { lavaTwinkles,           "Lava Twinkles" },
+//  { fireTwinkles,           "Fire Twinkles" },
+//  { cloud2Twinkles,         "Cloud 2 Twinkles" },
+//  { oceanTwinkles,          "Ocean Twinkles" },
 
   { rainbow,                "Rainbow" },
   { rainbowWithGlitter,     "Rainbow With Glitter" },
   { rainbowSolid,           "Solid Rainbow" },
   { confetti,               "Confetti" },
-  { sinelon,                "Sinelon" },
+//  { sinelon,                "Sinelon" },
   { bpm,                    "Beat" },
-  { juggle,                 "Juggle" },
+//  { juggle,                 "Juggle" },
   { fire,                   "Fire" },
   { water,                  "Water" },
 
@@ -259,7 +260,7 @@ void setup() {
     String macID = String(mac[WL_MAC_ADDR_LENGTH - 2], HEX) +
                    String(mac[WL_MAC_ADDR_LENGTH - 1], HEX);
     macID.toUpperCase();
-    String AP_NameString = "ESP8266 Thing " + macID;
+    String AP_NameString = "Thousand Petal Lotus " + macID;
 
     char AP_NameChar[AP_NameString.length() + 1];
     memset(AP_NameChar, 0, AP_NameString.length() + 1);
@@ -966,7 +967,8 @@ void showSolidColor()
 void rainbow()
 {
   // FastLED's built-in rainbow generator
-  fill_rainbow( leds, NUM_LEDS, gHue, 255 / NUM_LEDS);
+  fill_rainbow( leds, HALF_LEDS, gHue, 1000 / HALF_LEDS);
+  reverse_fill_rainbow( leds + HALF_LEDS, HALF_LEDS, gHue, 1000 / HALF_LEDS);
 }
 
 void rainbowWithGlitter()
@@ -985,24 +987,28 @@ void confetti()
 {
   // random colored speckles that blink in and fade smoothly
   fadeToBlackBy( leds, NUM_LEDS, 10);
-  int pos = random16(NUM_LEDS);
+  int pos = random16(HALF_LEDS);
   // leds[pos] += CHSV( gHue + random8(64), 200, 255);
   leds[pos] += ColorFromPalette(palettes[currentPaletteIndex], gHue + random8(64));
+  leds[NUM_LEDS - 1 - pos] += ColorFromPalette(palettes[currentPaletteIndex], gHue + random8(64));
 }
 
 void sinelon()
 {
   // a colored dot sweeping back and forth, with fading trails
-  fadeToBlackBy( leds, NUM_LEDS, 20);
-  int pos = beatsin16(speed, 0, NUM_LEDS);
+    fadeToBlackBy( leds, HALF_LEDS, 20);
+  int pos = beatsin16(speed, 0, HALF_LEDS);
   static int prevpos = 0;
   CRGB color = ColorFromPalette(palettes[currentPaletteIndex], gHue, 255);
   if( pos < prevpos ) {
     fill_solid( leds+pos, (prevpos-pos)+1, color);
+    fill_solid( leds+pos, (prevpos-pos)+1, color);
   } else {
+    fill_solid( leds+prevpos, (pos-prevpos)+1, color);
     fill_solid( leds+prevpos, (pos-prevpos)+1, color);
   }
   prevpos = pos;
+
 }
 
 void bpm()
@@ -1010,8 +1016,9 @@ void bpm()
   // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
   uint8_t beat = beatsin8( speed, 64, 255);
   CRGBPalette16 palette = palettes[currentPaletteIndex];
-  for ( int i = 0; i < NUM_LEDS; i++) {
+  for ( int i = 0; i < HALF_LEDS; i++) {
     leds[i] = ColorFromPalette(palette, gHue + (i * 2), beat - gHue + (i * 10));
+    leds[NUM_LEDS - 1 - i] = ColorFromPalette(palette, gHue + (i * 2), beat - gHue + (i * 10));
   }
 }
 
@@ -1083,7 +1090,7 @@ void pride()
   sHue16 += deltams * beatsin88( 400, 5, 9);
   uint16_t brightnesstheta16 = sPseudotime;
 
-  for ( uint16_t i = 0 ; i < NUM_LEDS; i++) {
+  for ( uint16_t i = 0 ; i < HALF_LEDS; i++) {
     hue16 += hueinc16;
     uint8_t hue8 = hue16 / 256;
 
@@ -1097,9 +1104,10 @@ void pride()
     CRGB newcolor = CHSV( hue8, sat8, bri8);
 
     uint16_t pixelnumber = i;
-    pixelnumber = (NUM_LEDS - 1) - pixelnumber;
+    pixelnumber = (HALF_LEDS - 1) - pixelnumber;
 
     nblend( leds[pixelnumber], newcolor, 64);
+    nblend( leds[NUM_LEDS - 1 - pixelnumber], newcolor, 64);
   }
 }
 
@@ -1125,12 +1133,12 @@ void heatMap(CRGBPalette16 palette, bool up)
   byte colorindex;
 
   // Step 1.  Cool down every cell a little
-  for ( uint16_t i = 0; i < NUM_LEDS; i++) {
-    heat[i] = qsub8( heat[i],  random8(0, ((cooling * 10) / NUM_LEDS) + 2));
+  for ( uint16_t i = 0; i < HALF_LEDS; i++) {
+    heat[i] = qsub8( heat[i],  random8(0, ((cooling * 10) / HALF_LEDS) + 2));
   }
 
   // Step 2.  Heat from each cell drifts 'up' and diffuses a little
-  for ( uint16_t k = NUM_LEDS - 1; k >= 2; k--) {
+  for ( uint16_t k = HALF_LEDS - 1; k >= 2; k--) {
     heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2] ) / 3;
   }
 
@@ -1141,7 +1149,7 @@ void heatMap(CRGBPalette16 palette, bool up)
   }
 
   // Step 4.  Map from heat cells to LED colors
-  for ( uint16_t j = 0; j < NUM_LEDS; j++) {
+  for ( uint16_t j = 0; j < HALF_LEDS; j++) {
     // Scale the heat value from 0-255 down to 0-240
     // for best results with color palettes.
     colorindex = scale8(heat[j], 190);
@@ -1150,17 +1158,21 @@ void heatMap(CRGBPalette16 palette, bool up)
 
     if (up) {
       leds[j] = color;
+      leds[NUM_LEDS - 1 - j] = color;
     }
     else {
       leds[(NUM_LEDS - 1) - j] = color;
+      leds[(HALF_LEDS - 1) - j] = color;
     }
   }
 }
 
 void addGlitter( uint8_t chanceOfGlitter)
 {
+  int glitterPosition = random16(HALF_LEDS);
   if ( random8() < chanceOfGlitter) {
-    leds[ random16(NUM_LEDS) ] += CRGB::White;
+    leds[ glitterPosition ] += CRGB::White;
+    leds[ NUM_LEDS - 1 - glitterPosition ] += CRGB::White;
   }
 }
 
@@ -1211,8 +1223,9 @@ void colorwaves( CRGB* ledarray, uint16_t numleds, CRGBPalette16& palette)
   sPseudotime += deltams * msmultiplier;
   sHue16 += deltams * beatsin88( 400, 5, 9);
   uint16_t brightnesstheta16 = sPseudotime;
+  uint16_t halfleds = numleds / 2;
 
-  for ( uint16_t i = 0 ; i < numleds; i++) {
+  for ( uint16_t i = 0 ; i < halfleds; i++) {
     hue16 += hueinc16;
     uint8_t hue8 = hue16 / 256;
     uint16_t h16_128 = hue16 >> 7;
@@ -1239,6 +1252,7 @@ void colorwaves( CRGB* ledarray, uint16_t numleds, CRGBPalette16& palette)
     pixelnumber = (numleds - 1) - pixelnumber;
 
     nblend( ledarray[pixelnumber], newcolor, 128);
+    nblend( leds[numleds - 1 - pixelnumber], newcolor, 128);
   }
 }
 
