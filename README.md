@@ -3,6 +3,17 @@ FastLED + ESP8266 Web Server
 
 Control an addressable LED strip with an ESP8266 via a web browser or infrared remote control.
 
+Before getting started, add a new file
+Secrets.h with the content
+```
+// AP mode password
+const char WiFiAPPSK[] = "";
+
+// Wi-Fi network to connect to (if not in AP mode)
+char* ssid = "YOUR-WIFI-SSID";
+char* password = "YOURWIFIPASS";
+```
+
 Hardware
 --------
 
