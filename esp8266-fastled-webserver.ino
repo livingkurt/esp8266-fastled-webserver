@@ -1,20 +1,24 @@
 /*
- * ESP8266 + FastLED + IR Remote: https://github.com/jasoncoon/esp8266-fastled-webserver
- * Copyright (C) 2015-2016 Jason Coon
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+   ESP8266 FastLED WebServer: https://github.com/jasoncoon/esp8266-fastled-webserver
+   Copyright (C) 2015-2018 Jason Coon
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+//#define FASTLED_ALLOW_INTERRUPTS 1
+//#define INTERRUPT_THRESHOLD 1
+#define FASTLED_INTERRUPT_RETRY_COUNT 0
 
 #include <FastLED.h>
 FASTLED_USING_NAMESPACE
@@ -27,7 +31,7 @@ extern "C" {
 //#include <ESP8266mDNS.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266HTTPUpdateServer.h>
-#include <WebSocketsServer.h>
+//#include <WebSocketsServer.h>
 #include <FS.h>
 #include <EEPROM.h>
 //#include <IRremoteESP8266.h>
@@ -42,23 +46,115 @@ extern "C" {
 
 //#include "Commands.h"
 
-const bool apMode = false;
-
 ESP8266WebServer webServer(80);
-WebSocketsServer webSocketsServer = WebSocketsServer(81);
+//WebSocketsServer webSocketsServer = WebSocketsServer(81);
 ESP8266HTTPUpdateServer httpUpdateServer;
-
-#include "WiFi.h"
 
 #include "FSBrowser.h"
 
-#define DATA_PIN      D4
-#define LED_TYPE      WS2811
-#define COLOR_ORDER   GRB
-#define NUM_LEDS      24
+// #define MY_NAME    "Thousand Petal Lotus"
+#define MY_NAME    "Kitchen" //burn kitchen
+//#define MY_NAME    "Garage Side"
+//#define MY_NAME    "Ground Floor"
+//#define MY_NAME    "1st Floor Roof"
+// #define MY_NAME    "Wreath"
+// #define MY_NAME    "Bed"
+// #define MY_NAME    "Fire Circle"
+// #define MY_NAME    "SmokeBreak"
+// #define MY_NAME    "Fuel Depot"
+// #define MY_NAME    "Backup"
+//#define MY_NAME    "Safety"
+//#define MY_NAME    "Phasing"
 
-#define MILLI_AMPS         2000     // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA)
-#define FRAMES_PER_SECOND  120 // here you can control the speed. With the Access Point / Web Server the animations run a bit slower.
+//MOM'S LIGHT STRINGS
+// #define MY_NAME    "kitchen stove top right" //mom's kitchen (54 leds, SYSTEM_MAX_LEDS = 100)
+// #define MY_NAME    "kitchen stove top left" //mom's kitchen (28 leds, SYSTEM_MAX_LEDS = 100)
+// #define MY_NAME    "kitchen refrigerator top" //mom's kitchen (49 leds, SYSTEM_MAX_LEDS = 100)
+// #define MY_NAME    "kitchen refrigerator bottom" //mom's kitchen (49 leds, SYSTEM_MAX_LEDS = 100)
+
+#define DATA_PIN    D2
+// #define DATA_PIN2   D3
+
+// if(MY_NAME == "Wreath"){
+  // #define SYSTEM_MAX_LEDS       144
+  // #define LED_TYPE              WS2812B //LED Strip
+  // #define COLOR_ORDER           GRB //LED Strip
+// } else if(MY_NAME == "Lotus"){
+  // #define SYSTEM_MAX_LEDS       60
+  // #define LED_TYPE              WS2812B //LED Strip
+  // #define COLOR_ORDER           GRB //LED Strip
+// } else if(MY_NAME == "Ground Floor" || MY_NAME == "1st Floor Roof" || MY_NAME == "Garage Side"){
+//   #define SYSTEM_MAX_LEDS       8 * 50
+//   #define LED_TYPE              WS2811 //LED String
+//   #define COLOR_ORDER           RGB // LED String
+// } else if(MY_NAME == "Phasing"){
+//   #define SYSTEM_MAX_LEDS       186
+//   #define LED_TYPE              WS2812B //LED Strip
+//   #define COLOR_ORDER           GRB //LED Strip
+// } else if(MY_NAME == "Fire Circle"){
+  #define SYSTEM_MAX_LEDS       9 * 50
+  #define LED_TYPE              WS2811 //LED String
+  #define COLOR_ORDER           RGB // LED String
+// } else if (MY_NAME == "SmokeBreak"){
+  // #define SYSTEM_MAX_LEDS       5 * 50
+  // #define LED_TYPE              WS2811 //LED String
+  // #define COLOR_ORDER           RGB // LED String
+// }
+// } else if(MY_NAME == "Kitchen" || MY_NAME == "Backup" || MY_NAME == "Fuel Depot"){
+  // #define SYSTEM_MAX_LEDS       4 * 50
+  // #define LED_TYPE              WS2811 //LED String
+  // #define COLOR_ORDER           RGB // LED String
+
+// } else if(MY_NAME == "Mom's Kitchen Light Strings"){
+  // #define SYSTEM_MAX_LEDS       100
+  // #define LED_TYPE              WS2813 //Mom's house LED Strips
+  // #define COLOR_ORDER           GRB //LED Strip
+// } else if(MY_NAME == "kitchen stove top right"){
+  // #define SYSTEM_MAX_LEDS       54
+  // #define LED_TYPE              WS2813 //Mom's house LED Strips
+  // #define COLOR_ORDER           GRB //LED Strip
+// } else if(MY_NAME == "kitchen stove top left"){
+  // #define SYSTEM_MAX_LEDS       28
+  // #define LED_TYPE              WS2813 //Mom's house LED Strips
+  // #define COLOR_ORDER           GRB //LED Strip
+// } else if(MY_NAME == "kitchen refrigerator top"){
+  // #define SYSTEM_MAX_LEDS       49
+  // #define LED_TYPE              WS2813 //Mom's house LED Strips
+  // #define COLOR_ORDER           GRB //LED Strip
+// }
+
+//#define HALF_SYSTEM_MAX_LEDS  SYSTEM_MAX_LEDS / 2
+
+//#define NUM_LEDS            60 // Lotus
+//#define NUM_LEDS            426 // Bed
+//#define NUM_LEDS            6 * 50 // First Floor
+//#define NUM_LEDS              5 * 50 // Ground Floor
+//#define NUM_LEDS            144 - 16// Wreath
+#define NUM_LEDS            SYSTEM_MAX_LEDS //try to sync everything
+
+#define HALF_LEDS             NUM_LEDS / 2
+#define HALF_SYSTEM_MAX_LEDS  HALF_LEDS
+
+#define MILLI_AMPS          4000 // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA) // standard usb
+//#define MILLI_AMPS            30000 // 30 Amps
+
+#define VOLTS         5 // IMPORTANT: LED Strip
+//#define VOLTS           12 // IMPORTANT: LED String
+
+#define FRAMES_PER_SECOND  120  // here you can control the speed. With the Access Point / Web Server the animations run a bit slower.
+
+const bool apMode = true;
+
+#include "Secrets.h" // this file is intentionally not included in the sketch, so nobody accidentally commits their secret information.
+// create a Secrets.h file with the following:
+
+// AP mode password
+// const char WiFiAPPSK[] = "your-password";
+
+// Wi-Fi network to connect to (if not in AP mode)
+// char* ssid = "Laniakea";
+// char* password = "2145467756";
+
 
 CRGB leds[NUM_LEDS];
 
@@ -73,12 +169,12 @@ uint8_t secondsPerPalette = 10;
 // COOLING: How much does the air cool as it rises?
 // Less cooling = taller flames.  More cooling = shorter flames.
 // Default 50, suggested range 20-100
-uint8_t cooling = 49;
+uint8_t cooling = 50;
 
 // SPARKING: What chance (out of 255) is there that a new spark will be lit?
 // Higher chance = more roaring fire.  Lower chance = more flickery fire.
 // Default 120, suggested range 50-200.
-uint8_t sparking = 60;
+uint8_t sparking = 120;
 
 uint8_t speed = 30;
 
@@ -131,6 +227,7 @@ typedef PatternAndName PatternAndNameList[];
 
 PatternAndNameList patterns = {
   { pride,                  "Pride" },
+//  { prideScaled,            "Pride Scaled" },
   { colorWaves,             "Color Waves" },
 
   // twinkle patterns
@@ -142,8 +239,10 @@ PatternAndNameList patterns = {
   // TwinkleFOX patterns
   { retroC9Twinkles,        "Retro C9 Twinkles" },
   { redWhiteTwinkles,       "Red & White Twinkles" },
+  { redWhiteGreenTwinkles,  "Red, White, & Green Twinkles"},
   { blueWhiteTwinkles,      "Blue & White Twinkles" },
   { redGreenWhiteTwinkles,  "Red, Green & White Twinkles" },
+  { whiteTwinkles,          "White Twinkles" },
   { fairyLightTwinkles,     "Fairy Light Twinkles" },
   { snow2Twinkles,          "Snow 2 Twinkles" },
   { hollyTwinkles,          "Holly Twinkles" },
@@ -154,9 +253,9 @@ PatternAndNameList patterns = {
   { fireTwinkles,           "Fire Twinkles" },
   { cloud2Twinkles,         "Cloud 2 Twinkles" },
   { oceanTwinkles,          "Ocean Twinkles" },
-
-  { rainbow,                "Rainbow" },
-  { rainbowWithGlitter,     "Rainbow With Glitter" },
+//
+//  { rainbow,                "Rainbow" },
+//  { rainbowWithGlitter,     "Rainbow With Glitter" },
   { rainbowSolid,           "Solid Rainbow" },
   { confetti,               "Confetti" },
   { sinelon,                "Sinelon" },
@@ -172,8 +271,8 @@ const uint8_t patternCount = ARRAY_SIZE(patterns);
 
 typedef struct {
   CRGBPalette16 palette;
-   String name;
- } PaletteAndName;
+  String name;
+} PaletteAndName;
 typedef PaletteAndName PaletteAndNameList[];
 
 const CRGBPalette16 palettes[] = {
@@ -195,24 +294,32 @@ const String paletteNames[paletteCount] = {
   "Cloud",
   "Lava",
   "Ocean",
-   "Forest",
+  "Forest",
   "Party",
-   "Heat",
- };
+  "Heat",
+};
 
 #include "Fields.h"
 
+void(* resetFunc) (void) = 0;
+
 void setup() {
+  WiFi.setSleepMode(WIFI_NONE_SLEEP);
+
   Serial.begin(115200);
   delay(100);
   Serial.setDebugOutput(true);
+
+  // if(WS2815){
+  //   FastLED.addLeds<LED_TYPE, DATA_PIN2, COLOR_ORDER>(leds, NUM_LEDS);         // for WS2815 (Neopixel)
+  // }
 
   FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS);         // for WS2812 (Neopixel)
   //FastLED.addLeds<LED_TYPE,DATA_PIN,CLK_PIN,COLOR_ORDER>(leds, NUM_LEDS); // for APA102 (Dotstar)
   FastLED.setDither(false);
   FastLED.setCorrection(TypicalLEDStrip);
   FastLED.setBrightness(brightness);
-  FastLED.setMaxPowerInVoltsAndMilliamps(5, MILLI_AMPS);
+  FastLED.setMaxPowerInVoltsAndMilliamps(VOLTS, MILLI_AMPS);
   fill_solid(leds, NUM_LEDS, CRGB::Black);
   FastLED.show();
 
@@ -221,7 +328,7 @@ void setup() {
 
   FastLED.setBrightness(brightness);
 
-//  irReceiver.enableIRIn(); // Start the receiver
+  //  irReceiver.enableIRIn(); // Start the receiver
 
   Serial.println();
   Serial.print( F("Heap: ") ); Serial.println(system_get_free_heap_size());
@@ -236,6 +343,8 @@ void setup() {
 
   SPIFFS.begin();
   {
+    Serial.println("SPIFFS contents:");
+
     Dir dir = SPIFFS.openDir("/");
     while (dir.next()) {
       String fileName = dir.fileName();
@@ -259,7 +368,10 @@ void setup() {
     String macID = String(mac[WL_MAC_ADDR_LENGTH - 2], HEX) +
                    String(mac[WL_MAC_ADDR_LENGTH - 1], HEX);
     macID.toUpperCase();
-    String AP_NameString = "ESP8266 Thing " + macID;
+    //    String AP_NameString = "Thousand Petal Lotus " + macID;
+    //    String AP_NameString = "Bed " + macID;
+    //    String AP_NameString = "First Floor " + macID;
+    String AP_NameString = String(MY_NAME) + " " + macID;
 
     char AP_NameChar[AP_NameString.length() + 1];
     memset(AP_NameChar, 0, AP_NameString.length() + 1);
@@ -279,23 +391,17 @@ void setup() {
     if (String(WiFi.SSID()) != String(ssid)) {
       WiFi.begin(ssid, password);
     }
-
-    while (WiFi.status() != WL_CONNECTED) {
-      delay(500);
-      Serial.print(".");
-    }
-
-    Serial.print("Connected! Open http://");
-    Serial.print(WiFi.localIP());
-    Serial.println(" in your browser");
   }
-
-  checkWiFi();
 
   httpUpdateServer.setup(&webServer);
 
   webServer.on("/all", HTTP_GET, []() {
     String json = getFieldsJson(fields, fieldCount);
+    webServer.send(200, "text/json", json);
+  });
+
+  webServer.on("/whoami", HTTP_GET, []() {
+    String json = "{\"name\":\"" + String(MY_NAME) + "\"}";
     webServer.send(200, "text/json", json);
   });
 
@@ -310,6 +416,12 @@ void setup() {
     String value = webServer.arg("value");
     String newValue = setFieldValue(name, value, fields, fieldCount);
     webServer.send(200, "text/json", newValue);
+  });
+
+  webServer.on("/reset", HTTP_POST, []() {
+    Serial.print("RESETTING");
+    resetFunc();
+    Serial.print("RESETTING SHOULD NOT GET HERE");
   });
 
   webServer.on("/power", HTTP_POST, []() {
@@ -342,7 +454,7 @@ void setup() {
   webServer.on("/twinkleSpeed", HTTP_POST, []() {
     String value = webServer.arg("value");
     twinkleSpeed = value.toInt();
-    if(twinkleSpeed < 0) twinkleSpeed = 0;
+    if (twinkleSpeed < 0) twinkleSpeed = 0;
     else if (twinkleSpeed > 8) twinkleSpeed = 8;
     broadcastInt("twinkleSpeed", twinkleSpeed);
     sendInt(twinkleSpeed);
@@ -351,7 +463,7 @@ void setup() {
   webServer.on("/twinkleDensity", HTTP_POST, []() {
     String value = webServer.arg("value");
     twinkleDensity = value.toInt();
-    if(twinkleDensity < 0) twinkleDensity = 0;
+    if (twinkleDensity < 0) twinkleDensity = 0;
     else if (twinkleDensity > 8) twinkleDensity = 8;
     broadcastInt("twinkleDensity", twinkleDensity);
     sendInt(twinkleDensity);
@@ -428,9 +540,9 @@ void setup() {
   webServer.begin();
   Serial.println("HTTP web server started");
 
-  webSocketsServer.begin();
-  webSocketsServer.onEvent(webSocketEvent);
-  Serial.println("Web socket server started");
+  //  webSocketsServer.begin();
+  //  webSocketsServer.onEvent(webSocketEvent);
+  //  Serial.println("Web socket server started");
 
   autoPlayTimeout = millis() + (autoplayDuration * 1000);
 }
@@ -448,34 +560,44 @@ void sendString(String value)
 void broadcastInt(String name, uint8_t value)
 {
   String json = "{\"name\":\"" + name + "\",\"value\":" + String(value) + "}";
-  webSocketsServer.broadcastTXT(json);
+  //  webSocketsServer.broadcastTXT(json);
 }
 
 void broadcastString(String name, String value)
 {
   String json = "{\"name\":\"" + name + "\",\"value\":\"" + String(value) + "\"}";
-  webSocketsServer.broadcastTXT(json);
+  //  webSocketsServer.broadcastTXT(json);
 }
 
 void loop() {
   // Add entropy to random number generator; we use a lot of it.
   random16_add_entropy(random(65535));
 
-  EVERY_N_SECONDS(10) {
-    checkWiFi();
-  }
-
-//  dnsServer.processNextRequest();
-  webSocketsServer.loop();
+  //  dnsServer.processNextRequest();
+  //  webSocketsServer.loop();
   webServer.handleClient();
 
-//  handleIrInput();
+  //  handleIrInput();
 
   if (power == 0) {
     fill_solid(leds, NUM_LEDS, CRGB::Black);
     FastLED.show();
     // FastLED.delay(15);
     return;
+  }
+
+  static bool hasConnected = false;
+  EVERY_N_SECONDS(1) {
+    if (WiFi.status() != WL_CONNECTED) {
+      //      Serial.printf("Connecting to %s\n", ssid);
+      hasConnected = false;
+    }
+    else if (!hasConnected) {
+      hasConnected = true;
+      Serial.print("Connected! Open http://");
+      Serial.print(WiFi.localIP());
+      Serial.println(" in your browser");
+    }
   }
 
   // EVERY_N_SECONDS(10) {
@@ -505,45 +627,45 @@ void loop() {
   FastLED.show();
 
   // insert a delay to keep the framerate modest
-  // FastLED.delay(1000 / FRAMES_PER_SECOND);
+  //  FastLED.delay(1000 / FRAMES_PER_SECOND);
 }
 
-void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
-
-  switch (type) {
-    case WStype_DISCONNECTED:
-      Serial.printf("[%u] Disconnected!\n", num);
-      break;
-
-    case WStype_CONNECTED:
-      {
-        IPAddress ip = webSocketsServer.remoteIP(num);
-        Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
-
-        // send message to client
-        // webSocketsServer.sendTXT(num, "Connected");
-      }
-      break;
-
-    case WStype_TEXT:
-      Serial.printf("[%u] get Text: %s\n", num, payload);
-
-      // send message to client
-      // webSocketsServer.sendTXT(num, "message here");
-
-      // send data to all connected clients
-      // webSocketsServer.broadcastTXT("message here");
-      break;
-
-    case WStype_BIN:
-      Serial.printf("[%u] get binary length: %u\n", num, length);
-      hexdump(payload, length);
-
-      // send message to client
-      // webSocketsServer.sendBIN(num, payload, lenght);
-      break;
-  }
-}
+//void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
+//
+//  switch (type) {
+//    case WStype_DISCONNECTED:
+//      Serial.printf("[%u] Disconnected!\n", num);
+//      break;
+//
+//    case WStype_CONNECTED:
+//      {
+//        IPAddress ip = webSocketsServer.remoteIP(num);
+//        Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
+//
+//        // send message to client
+//        // webSocketsServer.sendTXT(num, "Connected");
+//      }
+//      break;
+//
+//    case WStype_TEXT:
+//      Serial.printf("[%u] get Text: %s\n", num, payload);
+//
+//      // send message to client
+//      // webSocketsServer.sendTXT(num, "message here");
+//
+//      // send data to all connected clients
+//      // webSocketsServer.broadcastTXT("message here");
+//      break;
+//
+//    case WStype_BIN:
+//      Serial.printf("[%u] get binary length: %u\n", num, length);
+//      hexdump(payload, length);
+//
+//      // send message to client
+//      // webSocketsServer.sendBIN(num, payload, lenght);
+//      break;
+//  }
+//}
 
 //void handleIrInput()
 //{
@@ -762,6 +884,8 @@ void loadSettings()
   else if (currentPatternIndex >= patternCount)
     currentPatternIndex = patternCount - 1;
 
+  // currentPatternIndex = 0;
+
   byte r = EEPROM.read(2);
   byte g = EEPROM.read(3);
   byte b = EEPROM.read(4);
@@ -797,7 +921,7 @@ void setPower(uint8_t value)
 }
 
 void setAutoplay(uint8_t value)
-  {
+{
   autoplay = value == 0 ? 0 : 1;
 
   EEPROM.write(6, autoplay);
@@ -876,8 +1000,8 @@ void setPattern(uint8_t value)
 
 void setPatternName(String name)
 {
-  for(uint8_t i = 0; i < patternCount; i++) {
-    if(patterns[i].name == name) {
+  for (uint8_t i = 0; i < patternCount; i++) {
+    if (patterns[i].name == name) {
       setPattern(i);
       break;
     }
@@ -899,8 +1023,8 @@ void setPalette(uint8_t value)
 
 void setPaletteName(String name)
 {
-  for(uint8_t i = 0; i < paletteCount; i++) {
-    if(paletteNames[i] == name) {
+  for (uint8_t i = 0; i < paletteCount; i++) {
+    if (paletteNames[i] == name) {
       setPalette(i);
       break;
     }
@@ -966,7 +1090,10 @@ void showSolidColor()
 void rainbow()
 {
   // FastLED's built-in rainbow generator
-  fill_rainbow( leds, NUM_LEDS, gHue, 255 / NUM_LEDS);
+  fill_rainbow( leds, HALF_LEDS, gHue, 1000);
+  // Uncomment for mirrored strings
+  // fill_rainbow( leds, HALF_LEDS, gHue, 1000 / HALF_LEDS);
+  // reverse_fill_rainbow( leds + HALF_LEDS, HALF_LEDS, gHue, 1000 / HALF_LEDS);
 }
 
 void rainbowWithGlitter()
@@ -985,9 +1112,10 @@ void confetti()
 {
   // random colored speckles that blink in and fade smoothly
   fadeToBlackBy( leds, NUM_LEDS, 10);
-  int pos = random16(NUM_LEDS);
+  int pos = random16(HALF_LEDS);
   // leds[pos] += CHSV( gHue + random8(64), 200, 255);
   leds[pos] += ColorFromPalette(palettes[currentPaletteIndex], gHue + random8(64));
+  leds[NUM_LEDS - 1 - pos] += ColorFromPalette(palettes[currentPaletteIndex], gHue + random8(64));
 }
 
 void sinelon()
@@ -997,10 +1125,10 @@ void sinelon()
   int pos = beatsin16(speed, 0, NUM_LEDS);
   static int prevpos = 0;
   CRGB color = ColorFromPalette(palettes[currentPaletteIndex], gHue, 255);
-  if( pos < prevpos ) {
-    fill_solid( leds+pos, (prevpos-pos)+1, color);
+  if ( pos < prevpos ) {
+    fill_solid( leds + pos, (prevpos - pos) + 1, color);
   } else {
-    fill_solid( leds+prevpos, (pos-prevpos)+1, color);
+    fill_solid( leds + prevpos, (pos - prevpos) + 1, color);
   }
   prevpos = pos;
 }
@@ -1010,8 +1138,9 @@ void bpm()
   // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
   uint8_t beat = beatsin8( speed, 64, 255);
   CRGBPalette16 palette = palettes[currentPaletteIndex];
-  for ( int i = 0; i < NUM_LEDS; i++) {
+  for ( int i = 0; i < HALF_LEDS; i++) {
     leds[i] = ColorFromPalette(palette, gHue + (i * 2), beat - gHue + (i * 10));
+    leds[NUM_LEDS - 1 - i] = ColorFromPalette(palette, gHue + (i * 2), beat - gHue + (i * 10));
   }
 }
 
@@ -1083,7 +1212,7 @@ void pride()
   sHue16 += deltams * beatsin88( 400, 5, 9);
   uint16_t brightnesstheta16 = sPseudotime;
 
-  for ( uint16_t i = 0 ; i < NUM_LEDS; i++) {
+  for ( uint16_t i = 0 ; i < HALF_LEDS; i++) {
     hue16 += hueinc16;
     uint8_t hue8 = hue16 / 256;
 
@@ -1097,15 +1226,67 @@ void pride()
     CRGB newcolor = CHSV( hue8, sat8, bri8);
 
     uint16_t pixelnumber = i;
-    pixelnumber = (NUM_LEDS - 1) - pixelnumber;
+    pixelnumber = (HALF_LEDS - 1) - pixelnumber;
 
     nblend( leds[pixelnumber], newcolor, 64);
+    nblend( leds[NUM_LEDS - 1 - pixelnumber], newcolor, 64);
+  }
+}
+
+uint32_t FloatToUint(float n)
+{
+   return (uint32_t)(*(uint32_t*)&n);
+}
+
+
+void prideScaled()
+{
+  static uint16_t sPseudotime = 0;
+  static uint16_t sLastMillis = 0;
+  static uint16_t sHue16 = 0;
+
+  uint8_t sat8 = beatsin88( 87, 220, 250);
+  uint8_t brightdepth = beatsin88( 341, 96, 224);
+  uint16_t brightnessthetainc16 = beatsin88( 203, (25 * 256), (40 * 256));
+  uint8_t msmultiplier = beatsin88(147, 23, 60);
+
+  uint16_t hue16 = sHue16;//gHue * 256;
+  uint16_t hueinc16 = beatsin88(113, 1, 3000);
+
+  uint16_t ms = millis();
+  uint16_t deltams = ms - sLastMillis ;
+  sLastMillis  = ms;
+  sPseudotime += deltams * msmultiplier;
+  sHue16 += deltams * beatsin88( 400, 5, 9);
+  uint16_t brightnesstheta16 = sPseudotime;
+
+  for ( uint16_t i = 0 ; i < HALF_SYSTEM_MAX_LEDS; i++) {
+    hue16 += hueinc16;
+    uint8_t hue8 = hue16 / 256;
+
+    brightnesstheta16  += brightnessthetainc16;
+    uint16_t b16 = sin16( brightnesstheta16  ) + 32768;
+
+    uint16_t bri16 = (uint32_t)((uint32_t)b16 * (uint32_t)b16) / 65536;
+    uint8_t bri8 = (uint32_t)(((uint32_t)bri16) * brightdepth) / 65536;
+    bri8 += (255 - brightdepth);
+
+    CRGB newcolor = CHSV( hue8, sat8, bri8);
+
+    uint16_t pixelnumber = i;
+    pixelnumber = (HALF_SYSTEM_MAX_LEDS - 1) - pixelnumber;
+
+    //TODO: THERE IS SOMETHING WRONG WITH THIS LINE :(
+    uint16_t scaledPixelNumber = FloatToUint(pixelnumber / HALF_SYSTEM_MAX_LEDS * NUM_LEDS + .5);
+
+    nblend( leds[scaledPixelNumber], newcolor, 64);
+    nblend( leds[NUM_LEDS - 1 - scaledPixelNumber], newcolor, 64);
   }
 }
 
 void radialPaletteShift()
 {
-  for (uint8_t i = 0; i < NUM_LEDS; i++) {
+  for (uint16_t i = 0; i < NUM_LEDS; i++) {
     // leds[i] = ColorFromPalette( gCurrentPalette, gHue + sin8(i*16), brightness);
     leds[i] = ColorFromPalette(gCurrentPalette, i + gHue, 255, LINEARBLEND);
   }
@@ -1125,12 +1306,12 @@ void heatMap(CRGBPalette16 palette, bool up)
   byte colorindex;
 
   // Step 1.  Cool down every cell a little
-  for ( uint16_t i = 0; i < NUM_LEDS; i++) {
-    heat[i] = qsub8( heat[i],  random8(0, ((cooling * 10) / NUM_LEDS) + 2));
+  for ( uint16_t i = 0; i < HALF_LEDS; i++) {
+    heat[i] = qsub8( heat[i],  random8(0, ((cooling * 10) / HALF_LEDS) + 2));
   }
 
   // Step 2.  Heat from each cell drifts 'up' and diffuses a little
-  for ( uint16_t k = NUM_LEDS - 1; k >= 2; k--) {
+  for ( uint16_t k = HALF_LEDS - 1; k >= 2; k--) {
     heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2] ) / 3;
   }
 
@@ -1141,7 +1322,7 @@ void heatMap(CRGBPalette16 palette, bool up)
   }
 
   // Step 4.  Map from heat cells to LED colors
-  for ( uint16_t j = 0; j < NUM_LEDS; j++) {
+  for ( uint16_t j = 0; j < HALF_LEDS; j++) {
     // Scale the heat value from 0-255 down to 0-240
     // for best results with color palettes.
     colorindex = scale8(heat[j], 190);
@@ -1150,17 +1331,21 @@ void heatMap(CRGBPalette16 palette, bool up)
 
     if (up) {
       leds[j] = color;
+      leds[NUM_LEDS - 1 - j] = color;
     }
     else {
       leds[(NUM_LEDS - 1) - j] = color;
+      leds[(HALF_LEDS - 1) - j] = color;
     }
   }
 }
 
 void addGlitter( uint8_t chanceOfGlitter)
 {
+  int glitterPosition = random16(HALF_LEDS);
   if ( random8() < chanceOfGlitter) {
-    leds[ random16(NUM_LEDS) ] += CRGB::White;
+    leds[ glitterPosition ] += CRGB::White;
+    leds[ NUM_LEDS - 1 - glitterPosition ] += CRGB::White;
   }
 }
 
@@ -1211,8 +1396,9 @@ void colorwaves( CRGB* ledarray, uint16_t numleds, CRGBPalette16& palette)
   sPseudotime += deltams * msmultiplier;
   sHue16 += deltams * beatsin88( 400, 5, 9);
   uint16_t brightnesstheta16 = sPseudotime;
+  uint16_t halfleds = numleds / 2;
 
-  for ( uint16_t i = 0 ; i < numleds; i++) {
+  for ( uint16_t i = 0 ; i < halfleds; i++) {
     hue16 += hueinc16;
     uint8_t hue8 = hue16 / 256;
     uint16_t h16_128 = hue16 >> 7;
@@ -1239,6 +1425,7 @@ void colorwaves( CRGB* ledarray, uint16_t numleds, CRGBPalette16& palette)
     pixelnumber = (numleds - 1) - pixelnumber;
 
     nblend( ledarray[pixelnumber], newcolor, 128);
+    nblend( leds[numleds - 1 - pixelnumber], newcolor, 128);
   }
 }
 

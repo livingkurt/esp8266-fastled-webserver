@@ -3,7 +3,7 @@ var address = location.hostname;
 var urlBase = "";
 
 // used when hosting the site somewhere other than the ESP8266 (handy for testing without waiting forever to upload to SPIFFS)
-// var address = "esp8266-1920f7.local";
+// var address = "10.0.0.13";
 // var urlBase = "http://" + address + "/";
 
 var postColorTimer = {};
@@ -11,20 +11,25 @@ var postValueTimer = {};
 
 var ignoreColorChange = false;
 
-var ws = new ReconnectingWebSocket('ws://' + address + ':81/', ['arduino']);
-ws.debug = true;
+// var ws = new ReconnectingWebSocket('ws://' + address + ':81/', ['arduino']);
+// ws.debug = true;
 
-ws.onmessage = function(evt) {
-  if(evt.data != null)
-  {
-    var data = JSON.parse(evt.data);
-    if(data == null) return;
-    updateFieldValue(data.name, data.value);
-  }
-}
+// ws.onmessage = function (evt) {
+//   if (evt.data != null) {
+//     var data = JSON.parse(evt.data);
+//     if (data == null) return;
+//     updateFieldValue(data.name, data.value);
+//   }
+// }
 
-$(document).ready(function() {
+$(document).ready(function () {
   $("#status").html("Connecting, please wait...");
+
+  getWhoami();
+
+  $("#reset").click(function () {
+    postReset();
+  });
 
   $.get(urlBase + "all", function (data) {
       $("#status").html("Loading, please wait...");
@@ -537,6 +542,27 @@ function delayPostValue(name, value) {
   postValueTimer = setTimeout(function () {
     postValue(name, value);
   }, 300);
+}
+
+function getWhoami() {
+  var name = "whoami";
+  $.get(urlBase + name, function (data) {
+    $('#myName').html(data.name);
+    $("#status").html("Set myName to " + data.name);
+  }).fail(function (errorThrown) {
+    $("#status").html("Fail: " + errorThrown);
+  });
+}
+
+function postReset() {
+  var name = "reset";
+  $("#status").html("Server Reset");
+  $.post(urlBase + name, {}, function (data) {
+      //do nothing because this is expected to fail
+    })
+    .fail(function (textStatus, errorThrown) {
+      //do nothing because this is expected to fail
+    });
 }
 
 function postColor(name, value) {
