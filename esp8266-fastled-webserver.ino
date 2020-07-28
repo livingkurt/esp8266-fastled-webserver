@@ -19,6 +19,7 @@ extern "C"
 #include <EEPROM.h>
 //#include <IRremoteESP8266.h>
 #include "GradientPalettes.h"
+// #include "modes/modes.h"
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
@@ -41,9 +42,11 @@ ESP8266HTTPUpdateServer httpUpdateServer;
 #define LED_TYPE WS2811 //LED String
 #define COLOR_ORDER RGB // LED String
 
-#define NUM_LEDS SYSTEM_MAX_LEDS //try to sync everything
+// #define NUM_LEDS SYSTEM_MAX_LEDS //try to sync everything
 
+#define NUM_LEDS 50
 #define HALF_LEDS NUM_LEDS / 2
+
 #define HALF_SYSTEM_MAX_LEDS HALF_LEDS
 
 #define MILLI_AMPS 4000 // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA) // standard usb
@@ -129,6 +132,7 @@ typedef PatternAndName PatternAndNameList[];
 
 PatternAndNameList patterns = {
     {pride, "Pride"},
+    {shooting_star_rainbow_mirror, "Shooting Star Rainbow Mirror"},
     //  { prideScaled,            "Pride Scaled" },
     {colorWaves, "Color Waves"},
 
@@ -287,6 +291,26 @@ void broadcastString(String name, String value)
 {
   String json = "{\"name\":\"" + name + "\",\"value\":\"" + String(value) + "\"}";
   //  webSocketsServer.broadcastTXT(json);
+}
+
+int forwards(int length, int placement, int pos)
+{
+  return (length * placement) + pos;
+}
+
+int backwards(int length, int placement, int pos)
+{
+  return length * placement - 1 - pos;
+}
+
+void hold(int period)
+{
+  unsigned long time_now = 0;
+  time_now = millis();
+  while (millis() < time_now + period)
+  {
+    // FastLED.show();
+  }
 }
 
 void loop()
