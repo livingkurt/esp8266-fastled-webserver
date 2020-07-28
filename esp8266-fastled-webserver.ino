@@ -1,21 +1,3 @@
-/*
-   ESP8266 FastLED WebServer: https://github.com/jasoncoon/esp8266-fastled-webserver
-   Copyright (C) 2015-2018 Jason Coon
-
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
 //#define FASTLED_ALLOW_INTERRUPTS 1
 //#define INTERRUPT_THRESHOLD 1
 #define FASTLED_INTERRUPT_RETRY_COUNT 0
@@ -53,84 +35,12 @@ ESP8266HTTPUpdateServer httpUpdateServer;
 
 #include "FSBrowser.h"
 
-// #define MY_NAME    "Thousand Petal Lotus"
 #define MY_NAME "String Lights" //burn kitchen
-//#define MY_NAME    "Garage Side"
-//#define MY_NAME    "Ground Floor"
-//#define MY_NAME    "1st Floor Roof"
-// #define MY_NAME    "Wreath"
-// #define MY_NAME    "Bed"
-// #define MY_NAME    "Fire Circle"
-// #define MY_NAME    "SmokeBreak"
-// #define MY_NAME    "Fuel Depot"
-// #define MY_NAME    "Backup"
-//#define MY_NAME    "Safety"
-//#define MY_NAME    "Phasing"
-
-//MOM'S LIGHT STRINGS
-// #define MY_NAME    "kitchen stove top right" //mom's kitchen (54 leds, SYSTEM_MAX_LEDS = 100)
-// #define MY_NAME    "kitchen stove top left" //mom's kitchen (28 leds, SYSTEM_MAX_LEDS = 100)
-// #define MY_NAME    "kitchen refrigerator top" //mom's kitchen (49 leds, SYSTEM_MAX_LEDS = 100)
-// #define MY_NAME    "kitchen refrigerator bottom" //mom's kitchen (49 leds, SYSTEM_MAX_LEDS = 100)
-
 #define DATA_PIN D2
-// #define DATA_PIN2   D3
-
-// if(MY_NAME == "Wreath"){
-// #define SYSTEM_MAX_LEDS       144
-// #define LED_TYPE              WS2812B //LED Strip
-// #define COLOR_ORDER           GRB //LED Strip
-// } else if(MY_NAME == "Lotus"){
-// #define SYSTEM_MAX_LEDS       60
-// #define LED_TYPE              WS2812B //LED Strip
-// #define COLOR_ORDER           GRB //LED Strip
-// } else if(MY_NAME == "Ground Floor" || MY_NAME == "1st Floor Roof" || MY_NAME == "Garage Side"){
-//   #define SYSTEM_MAX_LEDS       8 * 50
-//   #define LED_TYPE              WS2811 //LED String
-//   #define COLOR_ORDER           RGB // LED String
-// } else if(MY_NAME == "Phasing"){
-//   #define SYSTEM_MAX_LEDS       186
-//   #define LED_TYPE              WS2812B //LED Strip
-//   #define COLOR_ORDER           GRB //LED Strip
-// } else if(MY_NAME == "Fire Circle"){
 #define SYSTEM_MAX_LEDS 9 * 50
 #define LED_TYPE WS2811 //LED String
 #define COLOR_ORDER RGB // LED String
-// } else if (MY_NAME == "SmokeBreak"){
-// #define SYSTEM_MAX_LEDS       5 * 50
-// #define LED_TYPE              WS2811 //LED String
-// #define COLOR_ORDER           RGB // LED String
-// }
-// } else if(MY_NAME == "Kitchen" || MY_NAME == "Backup" || MY_NAME == "Fuel Depot"){
-// #define SYSTEM_MAX_LEDS       4 * 50
-// #define LED_TYPE              WS2811 //LED String
-// #define COLOR_ORDER           RGB // LED String
 
-// } else if(MY_NAME == "Mom's Kitchen Light Strings"){
-// #define SYSTEM_MAX_LEDS       100
-// #define LED_TYPE              WS2813 //Mom's house LED Strips
-// #define COLOR_ORDER           GRB //LED Strip
-// } else if(MY_NAME == "kitchen stove top right"){
-// #define SYSTEM_MAX_LEDS       54
-// #define LED_TYPE              WS2813 //Mom's house LED Strips
-// #define COLOR_ORDER           GRB //LED Strip
-// } else if(MY_NAME == "kitchen stove top left"){
-// #define SYSTEM_MAX_LEDS       28
-// #define LED_TYPE              WS2813 //Mom's house LED Strips
-// #define COLOR_ORDER           GRB //LED Strip
-// } else if(MY_NAME == "kitchen refrigerator top"){
-// #define SYSTEM_MAX_LEDS       49
-// #define LED_TYPE              WS2813 //Mom's house LED Strips
-// #define COLOR_ORDER           GRB //LED Strip
-// }
-
-//#define HALF_SYSTEM_MAX_LEDS  SYSTEM_MAX_LEDS / 2
-
-//#define NUM_LEDS            60 // Lotus
-//#define NUM_LEDS            426 // Bed
-//#define NUM_LEDS            6 * 50 // First Floor
-//#define NUM_LEDS              5 * 50 // Ground Floor
-//#define NUM_LEDS            144 - 16// Wreath
 #define NUM_LEDS SYSTEM_MAX_LEDS //try to sync everything
 
 #define HALF_LEDS NUM_LEDS / 2
@@ -144,30 +54,7 @@ ESP8266HTTPUpdateServer httpUpdateServer;
 
 #define FRAMES_PER_SECOND 120 // here you can control the speed. With the Access Point / Web Server the animations run a bit slower.
 
-const bool apMode = false;
-
-// #include "Secrets.h" // this file is intentionally not included in the sketch, so nobody accidentally commits their secret information.
-// create a Secrets.h file with the following:
-
-// AP mode password
-// const char WiFiAPPSK[] = "";
-
-// Wi-Fi network to connect to (if not in AP mode)
-// char* ssid = "Laniakea";
-// char* password = "2145467756";
-
-// char ssid;
-// char password;
-
-// // AP mode password
-const char WiFiAPPSK[] = "";
-
-// // Wi-Fi network to connect to (if not in AP mode)
-// char *ssid = "";
-// char *password = "";
-
-const char *ssid;
-const char *password;
+// const bool apMode = false;
 
 CRGB leds[NUM_LEDS];
 
@@ -324,11 +211,6 @@ void setup()
   Serial.begin(115200);
   delay(100);
   Serial.setDebugOutput(true);
-
-  // if(WS2815){
-  //   FastLED.addLeds<LED_TYPE, DATA_PIN2, COLOR_ORDER>(leds, NUM_LEDS);         // for WS2815 (Neopixel)
-  // }
-
   FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS); // for WS2812 (Neopixel)
   //FastLED.addLeds<LED_TYPE,DATA_PIN,CLK_PIN,COLOR_ORDER>(leds, NUM_LEDS); // for APA102 (Dotstar)
   FastLED.setDither(false);

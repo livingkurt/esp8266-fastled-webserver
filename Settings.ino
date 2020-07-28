@@ -34,6 +34,15 @@ void loadSettings()
     currentPaletteIndex = paletteCount - 1;
 }
 
+// // scale the brightness of all pixels down
+// void dimAll(byte value)
+// {
+//   for (int i = 0; i < NUM_LEDS; i++)
+//   {
+//     leds[i].nscale8(value);
+//   }
+// }
+
 void setPower(uint8_t value)
 {
   power = value == 0 ? 0 : 1;

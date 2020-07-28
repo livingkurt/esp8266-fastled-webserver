@@ -1,3 +1,11 @@
+// AP mode password
+const char WiFiAPPSK[] = "";
+
+const char *ssid;
+const char *password;
+
+const bool apMode = false;
+
 void wifi_setup()
 {
   if (apMode)
