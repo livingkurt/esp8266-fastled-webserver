@@ -189,7 +189,8 @@ const CRGBPalette16 palettes[] = {
     OceanColors_p,
     ForestColors_p,
     PartyColors_p,
-    HeatColors_p};
+    HeatColors_p,
+    jet_gp};
 
 const uint8_t paletteCount = ARRAY_SIZE(palettes);
 
@@ -202,6 +203,7 @@ const String paletteNames[paletteCount] = {
     "Forest",
     "Party",
     "Heat",
+    "Ocean Sunset",
 };
 
 #include "Fields.h"
