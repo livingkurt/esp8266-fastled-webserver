@@ -430,3 +430,62 @@ void shooting_star_rainbow_mirror()
     start_hue += delta_hue;
   }
 }
+
+void cycle_rainbow_desaturated()
+{
+  int rate = 20;
+  int start_hue;
+  int delta_hue = 3;
+  int count = 255;
+  start_hue = -1 * millis() / rate;
+  for (int i = 0; i < NUM_LEDS; i++)
+
+  {
+    leds[i] = CHSV(start_hue, beatsin16(speed, 50, 255), 255);
+    // CRGB color = ColorFromPalette(palettes[currentPaletteIndex], gHue, 255);
+    start_hue += delta_hue;
+  };
+  // FastLED.show();
+}
+
+// void shooting_star_rainbow_mirror()
+// {
+//   int strobe = 10;
+//   int rate = 10;
+//   int start_hue;
+//   int delta_hue = 5;
+//   start_hue = -1 * millis() / rate;
+//   uint8_t beat = beatsin8(speed, 64, 255);
+//   // for (int i = 0; i < NUM_LEDS; i++)
+//   // {
+//   leds[beat] += CHSV(start_hue, 255, 255);
+//   // hold(speed);
+//   fadeToBlackBy(leds, NUM_LEDS, 30);
+//   leds[NUM_LEDS - beat] += CHSV(start_hue, 255, 255);
+//   // hold(speed);
+//   fadeToBlackBy(leds, NUM_LEDS, 30);
+//   FastLED.show();
+//   start_hue += delta_hue;
+//   // }
+// }
+
+// void shooting_star_rainbow_mirror()
+// {
+//   // a colored dot sweeping back and forth, with fading trails
+//   fadeToBlackBy(leds, NUM_LEDS, 20);
+//   int pos = beatsin16(speed, 0, NUM_LEDS);
+//   static int prevpos = 0;
+//   // CRGB color = ColorFromPalette(palettes[currentPaletteIndex], gHue, 255);
+//   // leds[i] = CHSV(gHue, 255, 255);
+//   CRGB color = CHSV(gHue, 255, 255);
+//   CRGB color = CHSV(gHue, 255, 255);
+//   if (pos < prevpos)
+//   {
+//     fill_solid(leds + pos, (prevpos - pos) + 1, color);
+//   }
+//   else
+//   {
+//     fill_solid(leds + prevpos, (pos - prevpos) + 1, color);
+//   }
+//   prevpos = pos;
+// }

@@ -44,7 +44,7 @@ ESP8266HTTPUpdateServer httpUpdateServer;
 
 // #define NUM_LEDS SYSTEM_MAX_LEDS //try to sync everything
 
-#define NUM_LEDS 50
+#define NUM_LEDS 200
 #define HALF_LEDS NUM_LEDS / 2
 
 #define HALF_SYSTEM_MAX_LEDS HALF_LEDS
@@ -132,8 +132,9 @@ typedef PatternAndName PatternAndNameList[];
 
 PatternAndNameList patterns = {
     {pride, "Pride"},
-    {shooting_star_rainbow_mirror, "Shooting Star Rainbow Mirror"},
     //  { prideScaled,            "Pride Scaled" },
+    // {shooting_star_rainbow_mirror, "Shooting Star Rainbow Mirror"},
+    {cycle_rainbow_desaturated, "Cycle Rainbow Desaturated"},
     {colorWaves, "Color Waves"},
 
     // twinkle patterns
@@ -170,7 +171,8 @@ PatternAndNameList patterns = {
     {fire, "Fire"},
     {water, "Water"},
 
-    {showSolidColor, "Solid Color"}};
+    {showSolidColor, "Solid Color"},
+};
 
 const uint8_t patternCount = ARRAY_SIZE(patterns);
 
@@ -311,7 +313,6 @@ void hold(int period)
   time_now = millis();
   while (millis() < time_now + period)
   {
-    // FastLED.show();
   }
 }
 

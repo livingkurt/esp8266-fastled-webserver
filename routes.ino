@@ -1,3 +1,13 @@
+void cors_set_access_control_headers()
+{
+  Serial.println("cors_set_access_control_headers");
+  webServer.sendHeader("Access-Control-Allow-Origin", "*");
+  webServer.sendHeader("Access-Control-Max-Age", "10000");
+  webServer.sendHeader("Access-Control-Allow-Methods", "PUT,POST,GET,OPTIONS");
+  webServer.sendHeader("Access-Control-Allow-Headers", "*");
+  webServer.send(204);
+}
+
 void run_server()
 {
   httpUpdateServer.setup(&webServer);
@@ -113,9 +123,12 @@ void run_server()
   });
 
   webServer.on("/brightness", HTTP_POST, []() {
+    // webServer.onNotFound(handleNotFound);
+    cors_set_access_control_headers();
     String value = webServer.arg("value");
     setBrightness(value.toInt());
     sendInt(brightness);
+    // webServer.sendHeader("Access-Control-Allow-Origin", "*");
   });
 
   webServer.on("/autoplay", HTTP_POST, []() {
@@ -150,7 +163,7 @@ void run_server()
       handleFileUpload);
 
   webServer.serveStatic("/", SPIFFS, "/", "max-age=86400");
-
   webServer.begin();
+
   Serial.println("HTTP web server started");
 }
