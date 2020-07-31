@@ -5,7 +5,7 @@ void cors_set_access_control_headers()
   webServer.sendHeader("Access-Control-Max-Age", "10000");
   webServer.sendHeader("Access-Control-Allow-Methods", "PUT,POST,GET,OPTIONS");
   webServer.sendHeader("Access-Control-Allow-Headers", "*");
-  webServer.send(204);
+  // webServer.send(204);
 }
 
 void run_server()
@@ -13,22 +13,26 @@ void run_server()
   httpUpdateServer.setup(&webServer);
 
   webServer.on("/all", HTTP_GET, []() {
+    cors_set_access_control_headers();
     String json = getFieldsJson(fields, fieldCount);
     webServer.send(200, "text/json", json);
   });
 
   webServer.on("/whoami", HTTP_GET, []() {
+    cors_set_access_control_headers();
     String json = "{\"name\":\"" + String(MY_NAME) + "\"}";
     webServer.send(200, "text/json", json);
   });
 
   webServer.on("/fieldValue", HTTP_GET, []() {
+    cors_set_access_control_headers();
     String name = webServer.arg("name");
     String value = getFieldValue(name, fields, fieldCount);
     webServer.send(200, "text/json", value);
   });
 
   webServer.on("/fieldValue", HTTP_POST, []() {
+    cors_set_access_control_headers();
     String name = webServer.arg("name");
     String value = webServer.arg("value");
     String newValue = setFieldValue(name, value, fields, fieldCount);
@@ -36,18 +40,21 @@ void run_server()
   });
 
   webServer.on("/reset", HTTP_POST, []() {
+    cors_set_access_control_headers();
     Serial.print("RESETTING");
     resetFunc();
     Serial.print("RESETTING SHOULD NOT GET HERE");
   });
 
   webServer.on("/power", HTTP_POST, []() {
+    cors_set_access_control_headers();
     String value = webServer.arg("value");
     setPower(value.toInt());
     sendInt(power);
   });
 
   webServer.on("/cooling", HTTP_POST, []() {
+    cors_set_access_control_headers();
     String value = webServer.arg("value");
     cooling = value.toInt();
     broadcastInt("cooling", cooling);
@@ -55,6 +62,7 @@ void run_server()
   });
 
   webServer.on("/sparking", HTTP_POST, []() {
+    cors_set_access_control_headers();
     String value = webServer.arg("value");
     sparking = value.toInt();
     broadcastInt("sparking", sparking);
@@ -62,6 +70,7 @@ void run_server()
   });
 
   webServer.on("/speed", HTTP_POST, []() {
+    cors_set_access_control_headers();
     String value = webServer.arg("value");
     speed = value.toInt();
     broadcastInt("speed", speed);
@@ -69,6 +78,7 @@ void run_server()
   });
 
   webServer.on("/twinkleSpeed", HTTP_POST, []() {
+    cors_set_access_control_headers();
     String value = webServer.arg("value");
     twinkleSpeed = value.toInt();
     if (twinkleSpeed < 0)
@@ -80,6 +90,7 @@ void run_server()
   });
 
   webServer.on("/twinkleDensity", HTTP_POST, []() {
+    cors_set_access_control_headers();
     String value = webServer.arg("value");
     twinkleDensity = value.toInt();
     if (twinkleDensity < 0)
@@ -91,6 +102,7 @@ void run_server()
   });
 
   webServer.on("/solidColor", HTTP_POST, []() {
+    cors_set_access_control_headers();
     String r = webServer.arg("r");
     String g = webServer.arg("g");
     String b = webServer.arg("b");
@@ -99,45 +111,49 @@ void run_server()
   });
 
   webServer.on("/pattern", HTTP_POST, []() {
+    cors_set_access_control_headers();
     String value = webServer.arg("value");
     setPattern(value.toInt());
     sendInt(currentPatternIndex);
   });
 
   webServer.on("/patternName", HTTP_POST, []() {
+    cors_set_access_control_headers();
     String value = webServer.arg("value");
     setPatternName(value);
     sendInt(currentPatternIndex);
   });
 
   webServer.on("/palette", HTTP_POST, []() {
+    cors_set_access_control_headers();
     String value = webServer.arg("value");
     setPalette(value.toInt());
     sendInt(currentPaletteIndex);
   });
 
   webServer.on("/paletteName", HTTP_POST, []() {
+    cors_set_access_control_headers();
     String value = webServer.arg("value");
     setPaletteName(value);
     sendInt(currentPaletteIndex);
   });
 
   webServer.on("/brightness", HTTP_POST, []() {
-    // webServer.onNotFound(handleNotFound);
     cors_set_access_control_headers();
     String value = webServer.arg("value");
     setBrightness(value.toInt());
     sendInt(brightness);
-    // webServer.sendHeader("Access-Control-Allow-Origin", "*");
   });
 
   webServer.on("/autoplay", HTTP_POST, []() {
+    cors_set_access_control_headers();
     String value = webServer.arg("value");
     setAutoplay(value.toInt());
     sendInt(autoplay);
   });
 
   webServer.on("/autoplayDuration", HTTP_POST, []() {
+    cors_set_access_control_headers();
     String value = webServer.arg("value");
     setAutoplayDuration(value.toInt());
     sendInt(autoplayDuration);
@@ -147,6 +163,7 @@ void run_server()
   webServer.on("/list", HTTP_GET, handleFileList);
   //load editor
   webServer.on("/edit", HTTP_GET, []() {
+    cors_set_access_control_headers();
     if (!handleFileRead("/edit.htm"))
       webServer.send(404, "text/plain", "FileNotFound");
   });
